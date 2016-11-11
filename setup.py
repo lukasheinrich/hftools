@@ -7,4 +7,9 @@ setup(
   author = 'Lukas Heinrich',
   author_email = 'lukas.heinrich@cern.ch',
   description = 'simple tools to extract to do post-processing on HistFactory configurations / workspaces (e.g. extract data for HepData, simple stacked plots etc.)',
+  install_requires = [
+    'click',
+    'pyyaml',
+    'numpy',
+  ],
 )
