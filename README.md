@@ -9,3 +9,5 @@
 
 ## Usage
 
+    hfquickplot fit results/example_combined_Meas1_model.root combined fitted.yml
+    hfquickplot plot_channel results/example_combined_Meas1_model.root combined channel1 x fitted.yml
