@@ -29,7 +29,7 @@ def shapeGaussVarNames(sysname,binnr):
 
 def shapePoissonVarNames(sysname,binnr):
     gamma =  'gamma_{}_bin_{}'.format(sysname,binnr)
-    tau =  'gamma_{}_bin_{}_tau'.format(sysname,binnr)
+    tau   =  'gamma_{}_bin_{}_tau'.format(sysname,binnr)
     return gamma,tau
 
 def isComponentFunc(channel,name,component = None):
@@ -77,6 +77,16 @@ def extract_total(ws,channel,obs):
     return h
 
 def extract(ws,channel,obs,component = None):
+    '''
+    Extract model contribution in a given channel and for a given observable as a histogram. If no model component
+    is given the full pdf in that channel is returned.
+
+    :param ws: a HistFactory workspace object
+    :param channel: a channel name
+    :param obs: an observable name
+    :param component: a component name
+    :return: the cotribution histogram
+    '''
     if not component:
         return extract_total(ws,channel,obs)
     oname=obsname(obs,channel)
@@ -101,6 +111,16 @@ def extract_with_pars(ws,channel,observable,component,pars,reference_snapshot = 
     return extract(ws,channel,observable,component)
 
 def extract_data(ws,channel,observable,name = None):
+    '''
+    Extract data projection for a given channel and observable
+
+    :param ws: a HistFactory workspace object
+    :param channel: a channel name
+    :param observable: the observable of the channel
+    :param name: an optional name for the resulting histogram
+
+    :return: the data histogram
+    '''
     data = ws.data(dataName())
     reduced = data.reduce('channelCat == channelCat::{}'.format(channel))
 

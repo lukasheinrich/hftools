@@ -68,6 +68,14 @@ def format_column_for_hepdata(ws,channel,observable,component,systematics,fitres
 
 
 def hepdata_table(ws,channel,observable,sampledef,fitresult = None):
+    '''
+    :param ws: a workspace object
+    :param channel: a HistFactory channel name
+    :param observable: an observable name (usually `x`)
+    :param sammpledef: sample definition dictionary
+    :param fitresult: fit result object to use as basic for variations
+    :return: HepData-formatted dictionary (YAML/JSON serializable)
+    '''
     compcols = []
     for sample,sampledef in sampledef:
         compcols += [format_column_for_hepdata(ws,channel,observable,sample,sampledef['systs'],fitresult)]

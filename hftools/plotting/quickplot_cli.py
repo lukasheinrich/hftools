@@ -3,13 +3,12 @@
 import ROOT
 ROOT.gROOT.SetBatch(True)
 import yaml
-from brewer2mpl import qualitative
-import itertools
 import click
 import os
-from .. import utils as hfutils
 from ..utils.parsexml import parse
 from .. import fitting as hffit
+from .. import plotting as hfplot
+from .. import utils as hfutils
 
 import logging
 log = logging.getLogger(__name__)
@@ -24,89 +23,7 @@ def get_workspace(rootfile,workspace):
         raise click.ClickException('Could not find workspace in file')
     return ws
 
-def get_weighted_histos(ws,channel,obs,components,filename):
 
-    return_data = {
-        'data':None,
-        'model':{}
-    }
-
-    return_data['data'] = hfutils.extract_data(ws,channel,obs)
-    for component in components:
-        return_data['model'][component] = hfutils.extract(ws,channel,obs,component)
-
-    return return_data
-
-def getlegend(*args, **kwargs):
-  legend = ROOT.TLegend(*args)
-  legend.SetShadowColor(kwargs.get('shadow',0))
-  legend.SetFillColor(kwargs.get('fill',0))
-  legend.SetFillStyle(kwargs.get('fillstyle',4000))
-  legend.SetLineColor(kwargs.get('line',0))
-  legend.SetTextFont(kwargs.get('font',43))
-  legend.SetTextColor(kwargs.get('fontcolor',ROOT.kBlack))
-  legend.SetTextSize(kwargs.get('fontsize',20))
-  return legend
-
-def plot(ws,channel,obs,components,filename,title,xaxis,yaxis,singlebin,dimensions,logy):
-    weighted_hists = get_weighted_histos(ws,channel,obs,components,filename)
-
-    stack = ROOT.THStack()
-    colormap = qualitative.Paired.get(len(components),None)
-    if not colormap:
-        colormap = qualitative.Paired['max']
-    colors = colormap.hex_colors
-
-    comphists = []
-    for color,component in zip(itertools.cycle(colors),components):
-        plotcomp = weighted_hists['model'][component].Clone()
-        plotcomp.SetFillColor(ROOT.TColor.GetColor(color))
-        plotcomp.SetLineColor(ROOT.kBlack)
-        log.info('adding to stack',component,plotcomp.GetSumOfWeights())
-        comphists += [(component,plotcomp)]
-        stack.Add(plotcomp)
-
-    width,height = map(int,dimensions.split('x'))
-    c = ROOT.TCanvas('c','c',width,height)
-    datahist = weighted_hists['data']
-    datahist.SetMarkerStyle(20);
-    datahist.SetLineColor(ROOT.kBlack)
-
-
-    frame = datahist.Clone()
-    frame.Reset('ICE')
-    frame.SetTitle(title or '')
-    frame.GetYaxis().SetRangeUser(0,datahist.GetMaximum()*1.5)
-    frame.GetYaxis().SetTitleOffset(1.4)
-
-
-    frame.GetXaxis().SetRangeUser(0,500)
-
-    frame.GetYaxis().SetTitle(yaxis or '')
-
-    if singlebin:
-        frame.GetXaxis().SetBinLabel(1,xaxis or '')
-        frame.GetXaxis().SetTitle('')
-    else:
-        frame.GetXaxis().SetTitle(xaxis or '')
-
-    if logy:
-        c.SetLogy()
-
-    frame.Draw()
-    ROOT.gStyle.SetOptStat(0)
-    stack.Draw('histsame')
-    datahist.Draw('sameE0')
-
-    x, y, linewidth = 0.7, 0.7, 0.03
-
-    l = getlegend(x,y,x+0.1,y+linewidth*(len(comphists)+1), fontsize = 15)
-    l.AddEntry(datahist,'data','pl')
-    for comp,h in reversed(comphists):
-        l.AddEntry(h,comp,'f')
-
-    l.Draw()
-    c.SaveAs(filename)
 
 def save_pars(ws,output,justvalues = False):
     mc = ws.obj('ModelConfig')
@@ -133,10 +50,6 @@ def save_pars(ws,output,justvalues = False):
 
     with open(output,'w') as results:
         results.write(yaml.dump(parpoint,default_flow_style = False))
-
-def get_path(basedir,relpath):
-    return '{}/{}'.format(basedir,relpath.split('./',1)[-1])
-
 
 @click.group()
 def toplevel():
@@ -173,7 +86,8 @@ def plot_channel(rootfile,workspace,channel,observable,components,parpointfile,o
 
     hfutils.set_pars2(ws,parpoint_data)
     complist = hfutils.samples(ws,channel) if components == 'all' else components.split(',')
-    plot(ws,channel,observable,complist,output,title,xaxis,yaxis,singlebin,dimensions,logy)
+    print hfplot
+    hfplot.quickplot(ws,channel,observable,complist,output,title,xaxis,yaxis,singlebin,dimensions,logy)
 
 
 @toplevel.command()

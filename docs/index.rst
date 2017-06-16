@@ -12,6 +12,27 @@ Contents:
    :maxdepth: 2
 
 
+.. automodule:: hftools.hepdata
+   :members:
+
+.. automodule:: hftools.hepdata.rootcnv
+   :members:
+
+.. automodule:: hftools.hepdata.rootcnv.formatters
+   :members:
+
+.. automodule:: hftools.fitting
+   :members:
+
+.. automodule:: hftools.plotting
+   :members:
+
+.. automodule:: hftools.utils
+   :members:
+
+.. automodule:: hftools.utils.parsexml
+   :members:
+
 
 Indices and tables
 ==================
