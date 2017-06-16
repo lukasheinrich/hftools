@@ -194,6 +194,7 @@ def fit(rootfile,workspace,output):
     f = ROOT.TFile.Open(rootfile)
     ws = get_workspace(f,workspace)
     result = hffit.fit(ws)
+    assert result
     save_pars(ws,output,False)
 
 

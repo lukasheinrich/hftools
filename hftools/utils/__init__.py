@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 def dataName():
     return "obsData"
 
-def simulPdfName():
+def simulPdfame():
     return 'simPdf'
 
 def binwidthname(obs,channel,componentindex):
@@ -170,7 +170,8 @@ def make_band_root(up,down,nominal,binmin = 0,binmax = 1):
     for i in range(1,nominal.GetNbinsX()+1):
         x_nom = nominal.GetBinCenter(i)
         x_lo = nominal.GetBinLowEdge(i)
-        x_hi = nominal.GetBinLowEdge(i)+nominal.GetBinWidth(i)\
+        x_hi = nominal.GetBinLowEdge(i)+nominal.GetBinWidth(i)
+        assert x_nom
 
         y_nom,y_up,y_down = [x.GetBinContent(i) for x in [nominal,up,down]]
 
