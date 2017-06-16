@@ -16,6 +16,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'hfquickplot = hftools.plotting.quickplot:toplevel',
+            'hfhdrootcnv = hftools.hepdata.rootcnv.cli:converter'
       ]
     },
 )

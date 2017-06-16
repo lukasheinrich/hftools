@@ -1,6 +1,8 @@
 import ROOT
 import math
 import re
+import logging
+log = logging.getLogger(__name__)
 
 def dataName():
   return "obsData"
@@ -84,7 +86,6 @@ def extract(ws,channel,obs,component = None):
 def extract_with_pars(ws,channel,observable,component,pars,reference_snapshot = "NominalParamValues"):
     set_pars(ws,pars,reference_snapshot)
     return extract(ws,channel,observable,component)
-
 
 def extract_data(ws,channel,observable,name = None):
     data = ws.data(dataName())

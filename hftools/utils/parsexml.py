@@ -1,9 +1,6 @@
 import xml.etree.ElementTree as ET
 import os
 
-def get_path(relative,base):
-    return '{}/{}'.format(os.path.abspath(base),os.path.split(relative)[-1])
-
 def format_sample_sys(element,rootdir):
   data = {
     'HFname':element.attrib['Name'],
@@ -39,9 +36,3 @@ def parse(configfile,rootdir):
         },
         'channels': channels
     }
-
-def main():
-  print parse('./config/simple.xml','.')
-
-if __name__ == '__main__':
-  main()

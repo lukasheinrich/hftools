@@ -8,84 +8,36 @@ import itertools
 import click
 import os
 import re
-import logging
+from .. import utils as hfutils
+from ..utils.parsexml import parse
 from xml.etree import ElementTree as etree
 
+import logging
 log = logging.getLogger(__name__)
 
 def get_workspace(rootfile,workspace):
     click.secho('getting workspace',fg = 'green')
     ws = rootfile.Get(str(workspace))
     if not ws:
-        print workspace
-        print rootfile.ls()
         raise click.ClickException('Could not find workspace in file')
     return ws
-
-def get_all_comps(funcs,obs,channel):
-    it = funcs.iterator()
-    regex = re.compile('L_{}_(.*)_{}_overallSyst'.format(obs,channel))
-    allcomps = []
-    for i in range(funcs.getSize()):
-        v = it.Next()
-        m = regex.match(v.GetName())
-        if m:
-            allcomps += [m.group(1)]
-    return allcomps
-
-def get_funcname(funcs,obs,component,channel):
-    it = funcs.iterator()
-    funcname = None
-    for i in range(funcs.getSize()):
-        v = it.Next()
-        if v.GetName().startswith('L_{}_{}_{}'.format(obs,component,channel)):
-            funcname = v.GetName()
-            return funcname
-    return funcname
-
-def get_datahist(data,obsvar,channel):
-    reduced = data.reduce('channelCat == channelCat::{}'.format(channel))
-    varlist = ROOT.RooArgList()
-    varlist.add(obsvar)
-    datahist = obsvar.createHistogram('data_{}'.format(channel))
-    datahist = reduced.fillHistogram(datahist,varlist)
-    datahist.Sumw2(0)
-    datahist.SetMarkerStyle(20);
-    datahist.SetLineColor(ROOT.kBlack)
-    return datahist
 
 def diff_hist(lhs,rhs):
     result.one.Clone()
     result.Add(rhs,-1)
 
 def get_weighted_histos(ws,channel,obs,components,filename):
-    obsname='obs_{}_{}'.format(obs,channel)
-    obsobj = ws.var(obsname)
-    binwidth = obsobj.getBinWidth(1) #assume equally spaced histos
+    obsname  = hfutils.obsname(obs,channel)
+    binwidth = ws.var(obsname).getBinWidth(1) #assume equally spaced histos
 
     return_data = {
         'data':None,
         'model':{}
     }
 
-
-    frame = obsobj.frame()
-
-    data = ws.data('obsData')
-    reduced = data.reduce('channelCat == channelCat::{}'.format(channel))
-
-    funcs = ws.allFunctions()
-
-    datahist = get_datahist(data,obsobj,channel)
-    return_data['data'] = datahist
-
+    return_data['data'] = hfutils.extract_data(ws,channel,obs)
     for component in components:
-        funcname=get_funcname(funcs,obs,component,channel)
-        function = ws.function(funcname)
-        histogram = function.createHistogram(obsname)
-        histogram.Scale(1./binwidth)
-        print 'sow',component,':',histogram.GetSumOfWeights()
-        return_data['model'][component] = histogram
+        return_data['model'][component] = hfutils.extract(ws,channel,obs,component)
 
     return return_data
 
@@ -114,13 +66,17 @@ def plot(ws,channel,obs,components,filename,title,xaxis,yaxis,singlebin,dimensio
         plotcomp = weighted_hists['model'][component].Clone()
         plotcomp.SetFillColor(ROOT.TColor.GetColor(color))
         plotcomp.SetLineColor(ROOT.kBlack)
-        print 'adding to stack',component,plotcomp.GetSumOfWeights()
+        log.info('adding to stack',component,plotcomp.GetSumOfWeights())
         comphists += [(component,plotcomp)]
         stack.Add(plotcomp)
 
     width,height = map(int,dimensions.split('x'))
     c = ROOT.TCanvas('c','c',width,height)
     datahist = weighted_hists['data']
+    datahist.SetMarkerStyle(20);
+    datahist.SetLineColor(ROOT.kBlack)
+
+
     frame = datahist.Clone()
     frame.Reset('ICE')
     frame.SetTitle(title or '')
@@ -187,30 +143,6 @@ def save_pars(ws,output,justvalues = False):
 def get_path(basedir,relpath):
     return '{}/{}'.format(basedir,relpath.split('./',1)[-1])
 
-def parse_histfactory_xml(toplvlxml):
-    dirname = os.path.abspath(os.path.dirname(toplvlxml))
-    histfithome = dirname.split('/config')[0]
-
-    p = etree.parse(toplvlxml)
-    channels =  [etree.parse(open(get_path(histfithome,inpt.text))).findall('.')[0] for inpt in p.findall('Input')]
-
-    parsed_data = {
-        'Combination':{
-            'Prefix':p.findall('.')[0].attrib['OutputFilePrefix'].split('./',1)[-1],
-            'Measurements':[ {'name':x.attrib['Name'] for x in p.findall('Measurement')}]
-        }
-    }
-
-    channel_info = []
-    for input_tag in p.findall('Input'):
-        channel_xml = etree.parse(open(get_path(histfithome,input_tag.text)))
-        channel_name = channel_xml.findall('.')[0].attrib['Name']
-        sample_names = [x.attrib['Name'] for x in channel_xml.findall('Sample')]
-        channel_info += [{'name':channel_name,'samples':sample_names}]
-
-    parsed_data['Combination']['Inputs'] = channel_info
-    return parsed_data
-
 
 @click.group()
 def toplevel():
@@ -220,7 +152,7 @@ def toplevel():
 @click.argument('toplvlxml')
 @click.argument('output')
 def dump_information(toplvlxml,output):
-    parsed_data = parse_histfactory_xml(toplvlxml)
+    parsed_data = parse(toplvlxml,os.getcwd())
     with open(output,'w') as f:
         f.write(yaml.safe_dump(parsed_data,default_flow_style = False))
 
@@ -247,7 +179,7 @@ def plot_channel(rootfile,workspace,channel,observable,components,parpointfile,o
     for name,value_data in parpoint_data.iteritems():
         ws.var(name).setVal(value_data['val'])
 
-    complist = get_all_comps(ws.allFunctions(),observable,channel) if components == 'all' else components.split(',')
+    complist = hfutils.samples(ws,channel) if components == 'all' else components.split(',')
     plot(ws,channel,observable,complist,output,title,xaxis,yaxis,singlebin,dimensions,logy)
 
 

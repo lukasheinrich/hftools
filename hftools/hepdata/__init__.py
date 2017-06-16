@@ -5,6 +5,8 @@ import math
 import hftools.hepdata.rootcnv as hfrootcnv
 import hftools.utils as hfutils
 import yaml
+import logging
+log = logging.getLogger(__name__)
 
 def nominal_with_all_systs(dep_info,**kwargs):
   nominal_key = nom = [k for k in dep_info.keys() if 'nominal' in k][0]
