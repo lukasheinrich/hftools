@@ -166,8 +166,7 @@ def save_pars(ws,output,justvalues = False):
         if justvalues:
             parpoint[v.GetName()] = v.getVal()
         else:
-            parpoint[v.GetName()] = {'min':v.getMin(),'max':v.getMax(),'defval':v.getVal()}
-
+            parpoint[v.GetName()] = {'min':v.getMin(),'max':v.getMax(),'val':v.getVal(),'err': v.getError()}
 
     nuis = mc.GetNuisanceParameters()
     if nuis:
@@ -245,8 +244,8 @@ def plot_channel(rootfile,workspace,channel,observable,components,parpointfile,o
     ws = get_workspace(f,workspace)
 
     parpoint_data = yaml.load(open(parpointfile))
-    for name,val in parpoint_data.iteritems():
-        ws.var(name).setVal(val)
+    for name,value_data in parpoint_data.iteritems():
+        ws.var(name).setVal(value_data['val'])
 
     complist = get_all_comps(ws.allFunctions(),observable,channel) if components == 'all' else components.split(',')
     plot(ws,channel,observable,complist,output,title,xaxis,yaxis,singlebin,dimensions,logy)
@@ -269,13 +268,13 @@ def write_vardef(rootfile,workspace,output):
 def fit(rootfile,workspace,output):
     f = ROOT.TFile.Open(rootfile)
     ws = get_workspace(f,workspace)
-    ws.pdf('simPdf').fitTo(ws.data('obsData'),
+    result = ws.pdf('simPdf').fitTo(ws.data('obsData'),
         ROOT.RooFit.Extended(True),
         ROOT.RooFit.Save(True),
         ROOT.RooFit.Minimizer("Minuit","Migrad"),
         ROOT.RooFit.Offset(True)
     )
-    save_pars(ws,output,True)
+    save_pars(ws,output,False)
 
 
 if __name__=='__main__':
