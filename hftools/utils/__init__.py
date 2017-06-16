@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 def dataName():
     return "obsData"
 
-def simulPdfame():
+def simulPdfName():
     return 'simPdf'
 
 def binwidthname(obs,channel,componentindex):
@@ -143,6 +143,8 @@ def getsys_pars(sysname,systype,**kwargs):
         workspace       = kwargs['workspace']
         observable      = kwargs['observable']
         constraint_type = kwargs['constraint_type']
+        assert constraint_type
+        assert observable
         raise NotImplementedError
     if systype in ['Lumi']:
         workspace      = kwargs['workspace']
