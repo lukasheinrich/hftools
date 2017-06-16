@@ -133,10 +133,10 @@ def getsys_pars(sysname,systype,**kwargs):
         constraintvar = 'alpha_{}'.format(sysname)
         return [{constraintvar:value} for value in [1.0,0.0,-1.0]]
     if systype in ['ShapeSys']:
-        workspace      = kwargs['workspace']
-        observable     = kwargs['observable']
+        workspace       = kwargs['workspace']
+        observable      = kwargs['observable']
         constraint_type = kwargs['constraint_type']
-        return get_shapesys_pars(workspace,observable,sysname,constraint_type)
+        return  (workspace,observable,sysname,constraint_type)
     if systype in ['Lumi']:
         workspace      = kwargs['workspace']
         return [{'Lumi':v} for v in getParFromConstraint(workspace,'lumiConstraint','Lumi')]
