@@ -22,14 +22,16 @@ def nominal_with_all_systs(dep_info,**kwargs):
     if errors: outdata.update(errors = errors)
     return outdata
 
-def format_column_for_hepdata(ws,channel,observable,component,systematics):
+def format_column_for_hepdata(ws,channel,observable,component,systematics,fitresult = None):
     log.warning('preparing HepData column for sample %s',component)
     loaded_param_sets = {}
     x = ws.var(hfutils.obsname(observable,channel))
     for name,defin in systematics.iteritems():
         loaded_param_sets[name] = hfutils.getsys_pars(defin['HFname'],defin['HFtype'],
-                                                  workspace = ws, observable = x,
-                                                  **(defin.get('additional_args',{})))
+                                                      workspace = ws, observable = x,
+                                                      **(defin.get('additional_args',{})))
+        if fitresult:
+            hfutils.getsys_pars_from_fit(defin['HFname'],defin['HFtype'],workspace = ws, observable = x)
 
     log.info('working with parameter set: %s',loaded_param_sets)
 
@@ -65,10 +67,10 @@ def format_column_for_hepdata(ws,channel,observable,component,systematics):
     return column_data
 
 
-def hepdata_table(ws,channel,observable,sampledef):
+def hepdata_table(ws,channel,observable,sampledef,fitresult = None):
     compcols = []
     for sample,sampledef in sampledef:
-        compcols += [format_column_for_hepdata(ws,channel,observable,sample,sampledef['systs'])]
+        compcols += [format_column_for_hepdata(ws,channel,observable,sample,sampledef['systs'],fitresult)]
 
     datacol = {
      'header': {'name': 'Data'},

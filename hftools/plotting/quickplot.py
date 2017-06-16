@@ -9,6 +9,7 @@ import click
 import os
 from .. import utils as hfutils
 from ..utils.parsexml import parse
+from .. import fitting as hffit
 
 import logging
 log = logging.getLogger(__name__)
@@ -110,9 +111,7 @@ def plot(ws,channel,obs,components,filename,title,xaxis,yaxis,singlebin,dimensio
 def save_pars(ws,output,justvalues = False):
     mc = ws.obj('ModelConfig')
 
-
     parpoint = {}
-
     def write(v):
         if justvalues:
             parpoint[v.GetName()] = v.getVal()
@@ -194,13 +193,7 @@ def write_vardef(rootfile,workspace,output):
 def fit(rootfile,workspace,output):
     f = ROOT.TFile.Open(rootfile)
     ws = get_workspace(f,workspace)
-    result = ws.pdf('simPdf').fitTo(ws.data('obsData'),
-        ROOT.RooFit.Extended(True),
-        ROOT.RooFit.Save(True),
-        ROOT.RooFit.Minimizer("Minuit","Migrad"),
-        ROOT.RooFit.Offset(True)
-    )
-    assert result
+    result = hffit.fit(ws)
     save_pars(ws,output,False)
 
 

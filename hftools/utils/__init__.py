@@ -6,6 +6,9 @@ log = logging.getLogger(__name__)
 def dataName():
     return "obsData"
 
+def simulPdfName():
+    return 'simPdf'
+
 def binwidthname(obs,channel,componentindex):
     return 'binWidth_{}_{}'.format(obsname(obs,channel),componentindex)
 
@@ -16,6 +19,7 @@ def obsname(obs,channel):
 def totalpdfname(channel):
     name = '{}_model'.format(channel)
     return name
+
 
 def set_pars(ws,parpoint,reference_snapshot):
     ws.loadSnapshot(reference_snapshot)
@@ -127,6 +131,9 @@ def get_shapesys_pars(ws,observable,sysname,constraint_type):
         pardict_nom.update(**{gamma_name:mean_val})
         pardict_dn.update(**{gamma_name:mean_val-sigma_val})
     return allpars
+
+def getsys_pars_from_fit(sysname,systype):
+    pass
 
 def getsys_pars(sysname,systype,**kwargs):
     if systype in ['OverallSys','HistoSys']:
