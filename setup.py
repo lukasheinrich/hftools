@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name = 'hftools',
-    version = '0.0.3',
+    version = '0.0.4',
     packages = find_packages(),
     author = 'Lukas Heinrich',
     author_email = 'lukas.heinrich@cern.ch',
