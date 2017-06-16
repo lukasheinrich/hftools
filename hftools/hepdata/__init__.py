@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-import ROOT
-import math
-import hftools.hepdata.rootcnv as hfrootcnv
+import rootcnv as hfrootcnv
 import hftools.utils as hfutils
-import yaml
 import logging
 log = logging.getLogger(__name__)
 
 def nominal_with_all_systs(dep_info,**kwargs):
-  nominal_key = nom = [k for k in dep_info.keys() if 'nominal' in k][0]
+  nominal_key = [k for k in dep_info.keys() if 'nominal' in k][0]
   sysnames = [k.split('_')[1] for k in dep_info.keys() if 'systhist' in k and 'up' in k]
 
   nom_val = dep_info[nominal_key]['value']
@@ -26,6 +23,7 @@ def nominal_with_all_systs(dep_info,**kwargs):
   return outdata
 
 def format_column_for_hepdata(ws,channel,observable,component,systematics):
+  log.warning('preparing HepData column for sample %s',component)
   loaded_param_sets = {}
   x = ws.var(hfutils.obsname(observable,channel))
   for name,defin in systematics.iteritems():
@@ -33,6 +31,7 @@ def format_column_for_hepdata(ws,channel,observable,component,systematics):
                                               workspace = ws, observable = x,
                                               **(defin.get('additional_args',{})))
 
+  log.info('working with parameter set: %s',loaded_param_sets)
 
   firstnom = None
   syst_hists = []
@@ -80,7 +79,7 @@ def hepdata_table(ws,channel,observable,sampledef):
     },
   }
 
-  allcols = [datacol]+ compcols
+  allcols = [datacol] + compcols
 
   to_convert = {
     'name': 'Channel {}'.format(channel),
@@ -93,5 +92,3 @@ def hepdata_table(ws,channel,observable,sampledef):
   hepdata_formatted = hfrootcnv.convertROOT(to_convert)
   return hepdata_formatted
 
-if __name__=='__main__':
-  convert()

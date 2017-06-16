@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-import os
 
 def format_sample_sys(element,rootdir):
   data = {

@@ -1,27 +1,33 @@
 import ROOT
 import math
-import re
 import logging
 log = logging.getLogger(__name__)
 
 def dataName():
-  return "obsData"
+    return "obsData"
 
 def binwidthname(obs,channel,componentindex):
-  return 'binWidth_{}_{}'.format(obsname(obs,channel),componentindex)
+    return 'binWidth_{}_{}'.format(obsname(obs,channel),componentindex)
 
 def obsname(obs,channel):
-  name='obs_{}_{}'.format(obs,channel)
-  return name
+    name='obs_{}_{}'.format(obs,channel)
+    return name
 
 def totalpdfname(channel):
-  name = '{}_model'.format(channel)
-  return name
+    name = '{}_model'.format(channel)
+    return name
 
 def set_pars(ws,parpoint,reference_snapshot):
-  ws.loadSnapshot(reference_snapshot)
-  for name,val in parpoint.iteritems():
-    ws.var(name).setVal(val)
+    ws.loadSnapshot(reference_snapshot)
+    for name,val in parpoint.iteritems():
+        ws.var(name).setVal(val)
+
+def set_pars2(ws,parpoint_data):
+    for name,value_data in parpoint_data.iteritems():
+        try:
+            ws.var(name).setVal(value_data['val'])
+        except:
+            log.exception('could not get variable %s',)
 
 def isComponentFunc(channel,name,component = None):
     if component:

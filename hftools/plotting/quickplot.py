@@ -7,13 +7,14 @@ from brewer2mpl import qualitative
 import itertools
 import click
 import os
-import re
 from .. import utils as hfutils
 from ..utils.parsexml import parse
-from xml.etree import ElementTree as etree
 
 import logging
 log = logging.getLogger(__name__)
+
+
+logging.basicConfig()
 
 def get_workspace(rootfile,workspace):
     click.secho('getting workspace',fg = 'green')
@@ -22,13 +23,7 @@ def get_workspace(rootfile,workspace):
         raise click.ClickException('Could not find workspace in file')
     return ws
 
-def diff_hist(lhs,rhs):
-    result.one.Clone()
-    result.Add(rhs,-1)
-
 def get_weighted_histos(ws,channel,obs,components,filename):
-    obsname  = hfutils.obsname(obs,channel)
-    binwidth = ws.var(obsname).getBinWidth(1) #assume equally spaced histos
 
     return_data = {
         'data':None,
@@ -176,9 +171,8 @@ def plot_channel(rootfile,workspace,channel,observable,components,parpointfile,o
     ws = get_workspace(f,workspace)
 
     parpoint_data = yaml.load(open(parpointfile))
-    for name,value_data in parpoint_data.iteritems():
-        ws.var(name).setVal(value_data['val'])
 
+    hfutils.set_pars2(ws,parpoint_data)
     complist = hfutils.samples(ws,channel) if components == 'all' else components.split(',')
     plot(ws,channel,observable,complist,output,title,xaxis,yaxis,singlebin,dimensions,logy)
 
@@ -206,6 +200,7 @@ def fit(rootfile,workspace,output):
         ROOT.RooFit.Minimizer("Minuit","Migrad"),
         ROOT.RooFit.Offset(True)
     )
+    assert result
     save_pars(ws,output,False)
 
 
