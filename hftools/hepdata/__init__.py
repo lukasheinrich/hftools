@@ -2,7 +2,7 @@
 
 import ROOT
 import math
-import hepdatarootcnv
+import hftools.hepdata.rootcnv as hfrootcnv
 import hftools.utils as hfutils
 import yaml
 
@@ -72,7 +72,7 @@ def hepdata_table(ws,channel,observable,sampledef):
   datacol = {
    'header': {'name': 'Data'},
    'conversion':{
-     'formatter': hepdatarootcnv.formatters.standard_format,
+     'formatter': hfrootcnv.formatters.standard_format,
      'formatter_args': {},
      'inputs': {'histo': hfutils.extract_data(ws,channel,observable)}
     },
@@ -88,7 +88,7 @@ def hepdata_table(ws,channel,observable,sampledef):
       {'header': {'name': observable}}
     ],
   }
-  hepdata_formatted = hepdatarootcnv.convertROOT(to_convert)
+  hepdata_formatted = hfrootcnv.convertROOT(to_convert)
   return hepdata_formatted
 
 if __name__=='__main__':
