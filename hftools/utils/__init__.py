@@ -133,7 +133,7 @@ def get_shapesys_pars(ws,observable,sysname,constraint_type):
     return allpars
 
 def getsys_pars_from_fit(sysname,systype):
-    pass
+    raise NotImplementedError
 
 def getsys_pars(sysname,systype,**kwargs):
     if systype in ['OverallSys','HistoSys']:
@@ -143,7 +143,7 @@ def getsys_pars(sysname,systype,**kwargs):
         workspace       = kwargs['workspace']
         observable      = kwargs['observable']
         constraint_type = kwargs['constraint_type']
-        return  (workspace,observable,sysname,constraint_type)
+        raise NotImplementedError
     if systype in ['Lumi']:
         workspace      = kwargs['workspace']
         return [{'Lumi':v} for v in getParFromConstraint(workspace,'lumiConstraint','Lumi')]
