@@ -3,6 +3,8 @@ import math
 import logging
 log = logging.getLogger(__name__)
 
+### Naming Conventions
+
 def dataName():
     return "obsData"
 
@@ -20,6 +22,23 @@ def totalpdfname(channel):
     name = '{}_model'.format(channel)
     return name
 
+def shapeGaussVarNames(sysname,binnr):
+    gamma =  'gamma_{}_bin_{}'.format(sysname,binnr)
+    sigma =  'gamma_{}_bin_{}_sigma'.format(sysname,binnr)
+    return gamma,sigma
+
+def shapePoissonVarNames(sysname,binnr):
+    gamma =  'gamma_{}_bin_{}'.format(sysname,binnr)
+    tau =  'gamma_{}_bin_{}_tau'.format(sysname,binnr)
+    return gamma,tau
+
+def isComponentFunc(channel,name,component = None):
+    if component:
+        return 'L_x_{}_{}'.format(component,channel) in name
+    else:
+        return name.startswith('L_x') and name.split('_')[3] == channel
+
+### End Naming Conventions
 
 def set_pars(ws,parpoint,reference_snapshot):
     ws.loadSnapshot(reference_snapshot)
@@ -32,22 +51,6 @@ def set_pars2(ws,parpoint_data):
             ws.var(name).setVal(value_data['val'])
         except:
             log.exception('could not get variable %s',)
-
-def isComponentFunc(channel,name,component = None):
-    if component:
-        return 'L_x_{}_{}'.format(component,channel) in name
-    else:
-        return name.startswith('L_x') and name.split('_')[3] == channel
-
-def shapeGaussVarNames(sysname,binnr):
-    gamma =  'gamma_{}_bin_{}'.format(sysname,binnr)
-    sigma =  'gamma_{}_bin_{}_sigma'.format(sysname,binnr)
-    return gamma,sigma
-
-def shapePoissonVarNames(sysname,binnr):
-    gamma =  'gamma_{}_bin_{}'.format(sysname,binnr)
-    tau =  'gamma_{}_bin_{}_tau'.format(sysname,binnr)
-    return gamma,tau
 
 def samples(ws,channel):
     allfuncs = ws.allFunctions()
