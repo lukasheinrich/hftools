@@ -8,7 +8,7 @@ install:
 
 script:
   - pyflakes hftools
-  - pytest -vv
+  - py.test -vv
 
 after_success:
   - coveralls 
