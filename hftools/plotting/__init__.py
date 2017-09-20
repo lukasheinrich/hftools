@@ -42,9 +42,43 @@ def _getlegend(*args,**kwargs):
     legend.SetTextSize(kwargs.get('fontsize',20))
     return legend
 
+
+def make_band_root(up,down,nominal,binmin = 0,binmax = 1):
+    '''
+    creates a TGraph error band from three histograms
+
+    :param up: the upward variation
+    :param down: the downward variation
+    :param nominal: the nominal histogram, used to position the band vertically
+    :return: the TGraph band
+    '''
+    g = ROOT.TGraphAsymmErrors(nominal.GetNbinsX())
+    for i in range(1,nominal.GetNbinsX()+1):
+        x_nom = nominal.GetBinCenter(i)
+        x_lo = nominal.GetBinLowEdge(i)
+        x_hi = nominal.GetBinLowEdge(i)+nominal.GetBinWidth(i)
+        assert x_nom
+
+        y_nom,y_up,y_down = [x.GetBinContent(i) for x in [nominal,up,down]]
+
+        binwidth = x_hi-x_lo
+        center = x_lo + binwidth*(binmax-binmin)/2.0
+        left   = x_lo + binwidth*binmin
+        right  = x_lo + binwidth*binmax
+
+        g.SetPoint(i-1,center,y_nom)
+        g.SetPointEXhigh(i-1,right-center)
+        g.SetPointEXlow(i-1,center-left)
+        g.SetPointEYhigh(i-1,y_up-y_nom)
+        g.SetPointEYlow(i-1,y_nom-y_down)
+    return g
+
 def quickplot(ws,channel,obs,components,filename,title,xaxis,yaxis,singlebin,dimensions,logy):
     '''
     :param ws: a HistFactory workspace
+    :param channel: a channel name
+    :param obs: an observable name
+    :param components: a list of components to plots (plot will respect order given here)
     :return: None
     '''
     weighted_hists = {
@@ -81,7 +115,7 @@ def quickplot(ws,channel,obs,components,filename,title,xaxis,yaxis,singlebin,dim
     frame.GetYaxis().SetTitleOffset(1.4)
 
 
-    frame.GetXaxis().SetRangeUser(0,500)
+    # frame.GetXaxis().SetRangeUser(0,500)
 
     frame.GetYaxis().SetTitle(yaxis or '')
 
