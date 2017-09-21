@@ -28,12 +28,12 @@ def _get_indep_info(rep):
     indep_list = []
     for x,y,z in itertools.product(*bin_ranges):
         indep_storage = []
-    for axis,axisbin in [(rep.GetXaxis(),x),(rep.GetYaxis(),y),(rep.GetZaxis(),z)]:
-        low = axis.GetBinLowEdge(axisbin)
-        width = axis.GetBinWidth(axisbin)
-        indep_storage += [{'low':low,'width':width}]
-    indep_list += [indep_storage[0:ndim]]
-    tag_list+=[(x,y,z)[0:ndim]]
+        for axis,axisbin in [(rep.GetXaxis(),x),(rep.GetYaxis(),y),(rep.GetZaxis(),z)]:
+            low = axis.GetBinLowEdge(axisbin)
+            width = axis.GetBinWidth(axisbin)
+            indep_storage += [{'low':low,'width':width}]
+        indep_list += [indep_storage[0:ndim]]
+        tag_list+=[(x,y,z)[0:ndim]]
     return (indep_list,tag_list)
 
 def convertROOT(table_definition):
